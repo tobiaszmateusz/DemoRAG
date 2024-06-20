@@ -247,7 +247,7 @@ def main():
 
     st.info("Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf", icon="ℹ️")
     st.info("OLLAMA w Technology nie działa", icon="ℹ️")
-    st.info("UNTRUCTURED w DatabaseModel nie działa", icon="ℹ️")
+    st.info("Mogą być problemy z odpowiedziami przez nieodpowiednie formaty promptów do modeli", icon="ℹ️")
 
     st.subheader("Upload a document")
     st.file_uploader(
