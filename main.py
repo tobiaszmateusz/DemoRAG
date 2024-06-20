@@ -1,4 +1,6 @@
- __import__('pysqlite3') import sys sys.modules['sqlite3'] = sys.modules.pop('pysqlite3') 
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langgraph.graph import END, StateGraph
 from pprint import pprint
 import streamlit as st
