@@ -245,7 +245,7 @@ def main():
     if "user_input" not in st.session_state:
         st.session_state["user_input"] = ""
         
-    st.info(os.path.dirname(os.path.abspath(__file__))
+    st.info(os.path.dirname(os.path.abspath(__file__)))
     st.info("Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf", icon="ℹ️")
     st.info("OLLAMA w Technology nie działa", icon="ℹ️")
     st.info("Mogą być problemy z odpowiedziami przez nieodpowiednie formaty promptów do modeli", icon="ℹ️")
