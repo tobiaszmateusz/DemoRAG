@@ -240,6 +240,7 @@ unstructured==0.14.5
 unstructured-client==0.23.2
 unstructured-inference==0.7.33
 unstructured.pytesseract==0.3.12
+unstructured[all-docs]==0.10.19
 urllib3==2.2.1
 userpath==1.9.2
 uvicorn==0.30.1
