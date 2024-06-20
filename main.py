@@ -9,7 +9,6 @@ from streamlit_chat import message
 from extras import *
 import tempfile
 import os
-os.popen('sh ./install.sh')
 from langchain.vectorstores import Chroma
 import chromadb
 from unstructured.partition.pdf import partition_pdf
@@ -247,6 +246,8 @@ def main():
         st.session_state["user_input"] = ""
 
     st.info("Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf", icon="ℹ️")
+    st.info("OLLAMA w Technology nie działa", icon="ℹ️")
+    st.info("UNTRUCTURED w DatabaseModel nie działa", icon="ℹ️")
 
     st.subheader("Upload a document")
     st.file_uploader(
