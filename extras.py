@@ -72,7 +72,7 @@ def get_ollama_key_sidebar() -> Optional[str]:
 
 
 def get_technology_work() -> Optional[str]:
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     technology_options = list(TECHNOLOGY.keys())
     technology_functions = {
