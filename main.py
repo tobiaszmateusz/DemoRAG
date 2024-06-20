@@ -1,5 +1,6 @@
 __import__('pysqlite3')
 import sys
+os.popen('sh ./install.sh')
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langgraph.graph import END, StateGraph
 from pprint import pprint
