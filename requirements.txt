@@ -236,10 +236,6 @@ typing-inspect==0.9.0
 typing_extensions==4.12.2
 tzdata==2024.1
 ujson==5.10.0
-unstructured==0.14.5
-unstructured-client==0.23.2
-unstructured-inference==0.7.33
-unstructured.pytesseract==0.3.12
 unstructured[all-docs]==0.10.19
 urllib3==2.2.1
 userpath==1.9.2
