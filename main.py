@@ -27,15 +27,16 @@ def check_database():
     embedding_name = st.session_state["embedding"]
     tech = st.session_state["tech"]
     create_database_method = st.session_state["create_database_method"]
-    persist_directory = f"./bases/chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
     return os.path.isdir(persist_directory) is not None
 
 
 def create_database():
     embedding_name = st.session_state["embedding"]
     tech = st.session_state["tech"]
-    create_database_method = st.session_state["create_database_method"]
-    persist_directory = f"./bases/chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
     chromadb.PersistentClient(path=persist_directory)
 
 
@@ -43,7 +44,8 @@ def get_collections():
     embedding_name = st.session_state["embedding"]
     tech = st.session_state["tech"]
     create_database_method = st.session_state["create_database_method"]
-    persist_directory = f"./bases/chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
     if os.path.isdir(persist_directory):
         client = chromadb.PersistentClient(path=persist_directory)
         st.session_state["collections"] = [collection.name for collection in client.list_collections()]
@@ -86,7 +88,8 @@ def add_to_db_if_not_exist(path: str, name: str):
     embedding_name = st.session_state["embedding"]
     create_database_method = st.session_state["create_database_method"]
     tech = st.session_state["tech"]
-    persist_directory = f"./bases/chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
     vectorstore = Chroma.from_documents(
         documents=documents,
         ids=ids,
@@ -102,7 +105,8 @@ def create_retriever_from_selected_documents():
     embedding_name = st.session_state["embedding"]
     tech = st.session_state["tech"]
     create_database_method = st.session_state["create_database_method"]
-    persist_directory = f"./bases/chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
     if os.path.isdir(persist_directory):
         for name in st.session_state["selected_documents"]:
             db = Chroma(persist_directory=persist_directory, collection_name=name,
@@ -245,7 +249,6 @@ def main():
     if "user_input" not in st.session_state:
         st.session_state["user_input"] = ""
         
-    st.info(os.path.dirname(os.path.abspath(__file__)))
     st.info("Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf", icon="ℹ️")
     st.info("OLLAMA w Technology nie działa", icon="ℹ️")
     st.info("Mogą być problemy z odpowiedziami przez nieodpowiednie formaty promptów do modeli", icon="ℹ️")
