@@ -208,6 +208,10 @@ def main():
     elif st.session_state["tech"] != tech:
         st.session_state["tech"] = tech
 
+    if tech == "OLLAMA":
+        st.info("OLLAMA w Technology nie działa", icon="ℹ️")
+        return
+        
     model = get_model_work()
     if "model" not in st.session_state:
         st.session_state["model"] = model
@@ -250,7 +254,6 @@ def main():
         st.session_state["user_input"] = ""
         
     st.info("Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf", icon="ℹ️")
-    st.info("OLLAMA w Technology nie działa", icon="ℹ️")
     st.info("Mogą być problemy z odpowiedziami przez nieodpowiednie formaty promptów do modeli", icon="ℹ️")
 
     st.subheader("Upload a document")
