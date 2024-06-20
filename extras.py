@@ -113,7 +113,7 @@ def get_embed_model_work() -> Optional[str]:
 def get_create_database_method():
     with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
-    create_database_method = TECHNOLOGY["create_database_method"]
+    create_database_method = ["DOCUMENT SPLITTING","UNSTRUCTURED"]
     create_database_method_work = st.sidebar.selectbox("Database Method:", create_database_method)
     return create_database_method_work
 

@@ -15,6 +15,5 @@
     "OLLAMA": {
         "model": ["llama3:8b", "phi3"],
         "embeddings": ["nomic-embed-text:latest","llama3:8b", "phi3"]
-    },
-    "create_database_method": ["DOCUMENT SPLITTING","UNSTRUCTURED"]
+    }
 }
