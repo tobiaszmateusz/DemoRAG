@@ -1,6 +1,5 @@
 __import__('pysqlite3')
 import sys
-os.popen('sh ./install.sh')
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langgraph.graph import END, StateGraph
 from pprint import pprint
@@ -10,6 +9,7 @@ from streamlit_chat import message
 from extras import *
 import tempfile
 import os
+os.popen('sh ./install.sh')
 from langchain.vectorstores import Chroma
 import chromadb
 from unstructured.partition.pdf import partition_pdf
