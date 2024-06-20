@@ -92,7 +92,7 @@ def get_technology_work() -> Optional[str]:
 def get_model_work(
     key: Optional[str] = None
 ) -> Optional[str]:
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     model_keys = list(TECHNOLOGY[st.session_state["tech"]]["model"])
     if key is not None:
@@ -103,7 +103,7 @@ def get_model_work(
 
 
 def get_embed_model_work() -> Optional[str]:
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     embeddings_keys = list(TECHNOLOGY[st.session_state["tech"]]["embeddings"])
     embeddings_work = st.sidebar.selectbox("Embeddings:", embeddings_keys)
@@ -111,7 +111,7 @@ def get_embed_model_work() -> Optional[str]:
 
 
 def get_create_database_method():
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     create_database_method = TECHNOLOGY["create_database_method"]
     create_database_method_work = st.sidebar.selectbox("Database Method:", create_database_method)
