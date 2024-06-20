@@ -28,7 +28,7 @@ def check_database():
     tech = st.session_state["tech"]
     create_database_method = st.session_state["create_database_method"]
     persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
     return os.path.isdir(persist_directory) is not None
 
 
@@ -36,7 +36,7 @@ def create_database():
     embedding_name = st.session_state["embedding"]
     tech = st.session_state["tech"]
     persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
     chromadb.PersistentClient(path=persist_directory)
 
 
@@ -45,7 +45,7 @@ def get_collections():
     tech = st.session_state["tech"]
     create_database_method = st.session_state["create_database_method"]
     persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
     if os.path.isdir(persist_directory):
         client = chromadb.PersistentClient(path=persist_directory)
         st.session_state["collections"] = [collection.name for collection in client.list_collections()]
@@ -89,7 +89,7 @@ def add_to_db_if_not_exist(path: str, name: str):
     create_database_method = st.session_state["create_database_method"]
     tech = st.session_state["tech"]
     persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
     vectorstore = Chroma.from_documents(
         documents=documents,
         ids=ids,
@@ -106,7 +106,7 @@ def create_retriever_from_selected_documents():
     tech = st.session_state["tech"]
     create_database_method = st.session_state["create_database_method"]
     persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file))
+    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
     if os.path.isdir(persist_directory):
         for name in st.session_state["selected_documents"]:
             db = Chroma(persist_directory=persist_directory, collection_name=name,
