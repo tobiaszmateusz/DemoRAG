@@ -1,6 +1,3 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 from langgraph.graph import END, StateGraph
 from pprint import pprint
 import streamlit as st
@@ -21,38 +18,29 @@ from langchain.retrievers import MergerRetriever
 from langchain_core.runnables import RunnablePassthrough
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from chat import *
 
 
 def check_database():
-    embedding_name = st.session_state["embedding"]
-    tech = st.session_state["tech"]
-    create_database_method = st.session_state["create_database_method"]
-    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
-    return os.path.isdir(persist_directory) is not None
+    global view
+    return os.path.isdir(view.persist_directory) is not None
 
 
 def create_database():
-    embedding_name = st.session_state["embedding"]
-    tech = st.session_state["tech"]
-    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
-    chromadb.PersistentClient(path=persist_directory)
+    global view
+    chromadb.PersistentClient(path=view.persist_directory)
 
 
 def get_collections():
-    embedding_name = st.session_state["embedding"]
-    tech = st.session_state["tech"]
-    create_database_method = st.session_state["create_database_method"]
-    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
-    if os.path.isdir(persist_directory):
-        client = chromadb.PersistentClient(path=persist_directory)
+    global view
+    if os.path.isdir(view.persist_directory):
+        client = chromadb.PersistentClient(path=view.persist_directory)
         st.session_state["collections"] = [collection.name for collection in client.list_collections()]
 
 
 def add_to_db_if_not_exist(path: str, name: str):
-    if st.session_state["create_database_method"] == "UNSTRUCTURED":
+    global view
+    if view.create_database_method == "UNSTRUCTURED":
         raw_pdf_elements = partition_pdf(
             filename=path,
             extract_images_in_pdf=False,
@@ -69,13 +57,18 @@ def add_to_db_if_not_exist(path: str, name: str):
                       "unstructured.documents.elements.CompositeElement" in str(type(element))]
         prompt_text = """You are an assistant tasked with summarizing tables and text. Give a concise summary of the table or text. Table or text chunk: {element} """
         prompt = ChatPromptTemplate.from_template(prompt_text)
-        model = LLM(model=st.session_state["model"], temperature=0.5, tech=st.session_state["tech"]).llm
+        model = LLM(model=view.model_name,
+                    temperature=view.temperature,
+                    tech=view.technology,
+                    top_p=view.top_p,
+                    frequency_penalty=view.frequency_penalty,
+                    presence_penalty=view.presence_penalty).llm
         summarize_chain = {"element": lambda x: x} | prompt | model | StrOutputParser()
         text_summaries = texts  # Skip it
         table_summaries = summarize_chain.batch(tables, {"max_concurrency": 5})
         summary = text_summaries + table_summaries
 
-    if st.session_state["create_database_method"] == "DOCUMENT SPLITTING":
+    if view.create_database_method  == "DOCUMENT SPLITTING":
         docs = PyPDFLoader(path).load()
         text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
             chunk_size=800, chunk_overlap=100
@@ -85,33 +78,62 @@ def add_to_db_if_not_exist(path: str, name: str):
 
     ids = [str(uuid.uuid4()) for _ in summary]
     documents = [Document(page_content=s, metadata={"file": name}) for s in summary]
-    embedding_name = st.session_state["embedding"]
-    create_database_method = st.session_state["create_database_method"]
-    tech = st.session_state["tech"]
-    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
     vectorstore = Chroma.from_documents(
         documents=documents,
         ids=ids,
         collection_name=name,
-        embedding=EMBEDDING(model=st.session_state["embedding"], tech=st.session_state["tech"]).embedding,
-        persist_directory=persist_directory
+        embedding=EMBEDDING(model=view.embeddings_model_name, tech=view.technology).embedding,
+        persist_directory=view.persist_directory
     )
     vectorstore.persist()
     # st.session_state["retrievers"].append({"db": vectorstore.as_retriever(), "name": name, "selected": False})
 
 
+def setup_chain(llm=None, memory=None, inject_knowledge=None, system_message=None, context_prompt=None, retriever=None):
+    global view
+    if not inject_knowledge:
+        if view.use_memory_of_conversation:
+        # Custom conversational chain
+            return ConversationalChain(
+                llm=llm,
+                memory=memory,
+                system_message=system_message,
+                verbose=True)
+        else:
+            return ConversationalChain(
+                llm=llm,
+                system_message=system_message,
+                verbose=True)
+    else:
+        if view.use_memory_of_conversation:
+            return ConversationalRetrievalChain(
+                llm=llm,
+                retriever=retriever,
+                memory=memory,
+                system_message=system_message,
+                context_prompt=context_prompt,
+                verbose=True)
+        else:
+            return ConversationalRetrievalChain(
+                llm=llm,
+                retriever=retriever,
+                system_message=system_message,
+                context_prompt=context_prompt,
+                verbose=True)
+
+
+def setup_memory():
+    msgs = StreamlitChatMessageHistory(key="langchain_messages")
+    return ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True)
+
+
 def create_retriever_from_selected_documents():
-    embedding_name = st.session_state["embedding"]
-    tech = st.session_state["tech"]
-    create_database_method = st.session_state["create_database_method"]
-    persist_directory_file = f"chroma_db_{tech}_{embedding_name.replace(':', '_')}_{create_database_method}"
-    persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", persist_directory_file)
-    if os.path.isdir(persist_directory):
+    global view
+    if os.path.isdir(view.persist_directory):
         for name in st.session_state["selected_documents"]:
-            db = Chroma(persist_directory=persist_directory, collection_name=name,
-                        embedding_function=EMBEDDING(model=st.session_state["embedding"],
-                                                     tech=st.session_state["tech"]).embedding)
+            db = Chroma(persist_directory=view.persist_directory, collection_name=name,
+                        embedding_function=EMBEDDING(model=view.embeddings_model_name,
+                                                     tech=view.technology).embedding)
             if any(i['file'] == name for i in db.get()['metadatas']):
                 # st.session_state["retrievers"].append({"db": db.as_retriever(), "name": name, "selected": False})
                 if st.session_state["retrievers"] is None:
@@ -142,38 +164,32 @@ def check_selected(name):
     st.session_state.selected_documents = selected_documents
 
 
-def process_input():
-    if st.session_state["user_input"] and len(st.session_state["user_input"].strip()) > 0:
-        user_text = st.session_state["user_input"].strip()
-        with st.session_state["thinking_spinner"], st.spinner(f"Thinking"):
-            agent_text = ask(user_text)
+def ask():
+    global view
+    global memory
 
-        st.session_state["messages"].append((user_text, True))
-        st.session_state["messages"].append((agent_text, False))
+    model = LLM(model=view.model_name,
+                temperature=view.temperature,
+                tech=view.technology,
+                top_p=view.top_p,
+                frequency_penalty=view.frequency_penalty,
+                presence_penalty=view.presence_penalty).llm
 
-
-def ask(query):
-    template = """Answer the question based only on the following context, which can include text and tables:
-    {context}
-    Question: {question}
-    """
-    prompt = ChatPromptTemplate.from_template(template)
-
-    model = LLM(model=st.session_state["model"], tech=st.session_state["tech"]).llm
-
-    chain = (
-            {"context": st.session_state["retriever"], "question": RunnablePassthrough()}
-            | prompt
-            | model
-            | StrOutputParser()
-    )
-    output = chain.invoke(query)
-    if st.session_state["tech"] == "HUGGINGFACE":
-        answer_index = output.find("Answer:")
-        if answer_index != -1:
-            return output[answer_index + 7:]
+    if (view.use_memory_of_conversation):
+        chain = setup_chain(llm=model,
+                            memory=memory,
+                            retriever=st.session_state["retriever"],
+                            inject_knowledge=True,
+                            system_message=view.system_message,
+                            context_prompt=view.context_prompt)
     else:
-        return output
+        chain = setup_chain(llm=model,
+                            retriever=st.session_state["retriever"],
+                            inject_knowledge=True,
+                            system_message=view.system_message,
+                            context_prompt=view.context_prompt)
+
+    return chain
 
 
 def restart_assistant():
@@ -186,54 +202,17 @@ def restart_assistant():
     # st.rerun()
 
 
-def display_messages():
-    st.subheader("Chat")
-    if "messages" in st.session_state:
-        for i, (msg, is_user) in enumerate(st.session_state["messages"]):
-            message(msg, is_user=is_user, key=str(i))
-    st.session_state["thinking_spinner"] = st.empty()
-
+view = None
 
 def main():
     load_dotenv()
-    st.set_page_config(
-        page_title="PDF AI",
-    )
-    st.title("PDF Assistant")
 
-    tech = get_technology_work()
-    if "tech" not in st.session_state:
-        st.session_state["tech"] = tech
-    # Restart the assistant if assistant_type has changed
-    elif st.session_state["tech"] != tech:
-        st.session_state["tech"] = tech
+    global view
+    global memory
 
-    if tech == "OLLAMA":
-        st.info("OLLAMA w Technology nie działa", icon="ℹ️")
-        return
-        
-    model = get_model_work()
-    if "model" not in st.session_state:
-        st.session_state["model"] = model
-    # Restart the assistant if assistant_type has changed
-    elif st.session_state["model"] != model:
-        st.session_state["model"] = model
+    memory = setup_memory()
+    view = StreamlitChatView(memory=memory)
 
-    create_database_method = get_create_database_method()
-    if "create_database_method" not in st.session_state:
-        st.session_state["create_database_method"] = create_database_method
-    # Restart the assistant if assistant_type has changed
-    elif st.session_state["create_database_method"] != create_database_method:
-        st.session_state["create_database_method"] = create_database_method
-        restart_assistant()
-
-    embedding = get_embed_model_work()
-    if "embedding" not in st.session_state:
-        st.session_state["embedding"] = embedding
-    # Restart the assistant if assistant_type has changed
-    elif st.session_state["embedding"] != embedding:
-        st.session_state["embedding"] = embedding
-        restart_assistant()
 
     if "collections" not in st.session_state:
         st.session_state["collections"] = None
@@ -252,9 +231,8 @@ def main():
 
     if "user_input" not in st.session_state:
         st.session_state["user_input"] = ""
-        
+
     st.info("Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf", icon="ℹ️")
-    st.info("Mogą być problemy z odpowiedziami przez nieodpowiednie formaty promptów do modeli", icon="ℹ️")
 
     st.subheader("Upload a document")
     st.file_uploader(
@@ -266,10 +244,8 @@ def main():
         accept_multiple_files=True,
     )
 
-    if st.session_state["embedding"] is not None:
+    if view.embeddings_model_name is not None:
         if not check_database():
-            # get_collections()
-        # else:
             create_database()
         st.button("Add to ChromaDB",
                   on_click=lambda: check_existing())
@@ -292,9 +268,14 @@ def main():
         st.button("Create retriever from selected document", on_click=lambda: create_retriever_from_selected_documents())
 
     if "retriever" in st.session_state and st.session_state["retriever"] is not None:
-        display_messages()
-        st.text_input("Message", key="user_input")
-        st.button("Generate answer", on_click=lambda: process_input())
+        # Display previous messages
+        for message in memory.chat_memory.messages:
+            view.add_message(message.content, 'assistant' if message.type == 'ai' else 'user')
+
+        if view.user_query:
+            view.add_message(view.user_query, "user")
+            response = ask().run({"question": view.user_query})
+            view.add_message(response, "assistant")
 
     else:
         st.info(

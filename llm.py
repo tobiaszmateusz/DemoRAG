@@ -6,19 +6,39 @@ from langchain_community.llms import HuggingFaceHub
 
 
 class LLM:
-    def __init__(self, model, temperature=0, format=None, tech=None):
+    def __init__(self, model, temperature=0, format=None, tech=None, top_p=None, frequency_penalty=None, presence_penalty=None):
         self.model = model
         self.temperature = temperature
         self.format = format
         self.tech = tech
         if tech == 'OPENAI':
-            self.llm = ChatOpenAI(model=model, temperature=temperature)
+            self.llm = ChatOpenAI(
+                model_name=model,
+                temperature=temperature,
+                top_p=top_p,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty)
         elif tech == 'OLLAMA':
-            self.llm = ChatOllama(model=model, temperature=temperature)
+            self.llm = ChatOllama(
+                model_name=model,
+                temperature=temperature,
+                top_p=top_p,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty)
         elif tech == 'GROQ':
-            self.llm = ChatGroq(model=model, temperature=temperature)
+            self.llm = ChatGroq(
+                model_name=model,
+                temperature=temperature,
+                top_p=top_p,
+                frequency_penalty=frequency_penalty,
+                presence_penalty=presence_penalty)
         elif tech == 'HUGGINGFACE':
-            self.llm = HuggingFaceHub(repo_id=model,  model_kwargs={"temperature":0.1, "max_length":500})
+            self.llm = HuggingFaceHub(repo_id=model,
+                                      model_kwargs={"temperature":{temperature},
+                                                    "max_length":500,
+                                                    'top_p':{top_p},
+                                                    'frequency_penalty':{frequency_penalty},
+                                                    'presence_penalty':{presence_penalty}})
 
 
 class EMBEDDING:

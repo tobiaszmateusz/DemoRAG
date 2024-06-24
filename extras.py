@@ -71,8 +71,10 @@ def get_ollama_key_sidebar() -> Optional[str]:
     return groq_key
 
 
-def get_technology_work() -> Optional[str]:
-    with open('./technology.json', 'r') as f:
+def get_technology_work(
+    reset_assistant=None,
+) -> Optional[str]:
+    with open('langchain_rag_v2/technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     technology_options = list(TECHNOLOGY.keys())
     technology_functions = {
@@ -81,7 +83,7 @@ def get_technology_work() -> Optional[str]:
         "GROQ": get_groq_key_sidebar,
     }
 
-    technology_work = st.sidebar.selectbox("Technology", technology_options)
+    technology_work = st.sidebar.selectbox("Technology", technology_options, on_change=lambda: reset_assistant())
 
     if technology_work and technology_work != "OLLAMA":
         technology_functions.get(technology_work, lambda: None)()
@@ -90,11 +92,13 @@ def get_technology_work() -> Optional[str]:
 
 
 def get_model_work(
-    key: Optional[str] = None
+    key: Optional[str] = None,
+    technology: [str] = None
 ) -> Optional[str]:
-    with open('./technology.json', 'r') as f:
+    global view
+    with open('langchain_rag_v2/technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
-    model_keys = list(TECHNOLOGY[st.session_state["tech"]]["model"])
+    model_keys = list(TECHNOLOGY[technology.upper()]["model"])
     if key is not None:
         return st.sidebar.selectbox(f"Model {key}:", model_keys, key=key)
     else:
@@ -102,17 +106,18 @@ def get_model_work(
 
 
 
-def get_embed_model_work() -> Optional[str]:
-    with open('./technology.json', 'r') as f:
+def get_embed_model_work(
+    technology: [str] = None,
+    reset_assistant=None,
+) -> Optional[str]:
+    with open('langchain_rag_v2/technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
-    embeddings_keys = list(TECHNOLOGY[st.session_state["tech"]]["embeddings"])
-    embeddings_work = st.sidebar.selectbox("Embeddings:", embeddings_keys)
+    embeddings_keys = list(TECHNOLOGY[technology.upper()]["embeddings"])
+    embeddings_work = st.sidebar.selectbox("Embeddings:", embeddings_keys, on_change=lambda: reset_assistant())
     return embeddings_work
 
 
 def get_create_database_method():
-    with open('./technology.json', 'r') as f:
-        TECHNOLOGY = json.load(f)
     create_database_method = ["DOCUMENT SPLITTING","UNSTRUCTURED"]
     create_database_method_work = st.sidebar.selectbox("Database Method:", create_database_method)
     return create_database_method_work
