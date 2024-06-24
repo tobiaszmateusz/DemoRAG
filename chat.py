@@ -57,7 +57,7 @@ class StreamlitChatView:
                 self.embeddings_model_name = get_embed_model_work(key=None, technology=self.technology, reset_assistant=reset_assistant)
             self.use_memory_of_conversation = st.checkbox("Use previous chats messages", value=True, on_change=lambda: reset_mess(self.memory))
             
-        persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", f"chroma_db_{self.technology}_{self.embeddings_model_name.replace(':', '_')}_{self.create_database_method}")
+        self.persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", f"chroma_db_{self.technology}_{self.embeddings_model_name.replace(':', '_')}_{self.create_database_method}")
         self.user_query = st.chat_input(placeholder="Ask me anything!")
 
     def add_message(self, message: str, author: str):
