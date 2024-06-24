@@ -74,7 +74,7 @@ def get_ollama_key_sidebar() -> Optional[str]:
 def get_technology_work(
     reset_assistant=None,
 ) -> Optional[str]:
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     technology_options = list(TECHNOLOGY.keys())
     technology_functions = {
@@ -96,7 +96,7 @@ def get_model_work(
     technology: [str] = None
 ) -> Optional[str]:
     global view
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     model_keys = list(TECHNOLOGY[technology.upper()]["model"])
     if key is not None:
@@ -110,7 +110,7 @@ def get_embed_model_work(
     technology: [str] = None,
     reset_assistant=None,
 ) -> Optional[str]:
-    with open('langchain_rag_v2/technology.json', 'r') as f:
+    with open('./technology.json', 'r') as f:
         TECHNOLOGY = json.load(f)
     embeddings_keys = list(TECHNOLOGY[technology.upper()]["embeddings"])
     embeddings_work = st.sidebar.selectbox("Embeddings:", embeddings_keys, on_change=lambda: reset_assistant())
