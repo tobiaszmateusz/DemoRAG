@@ -107,6 +107,7 @@ def get_model_work(
 
 
 def get_embed_model_work(
+    key: Optional[str] = None,
     technology: [str] = None,
     reset_assistant=None,
 ) -> Optional[str]:
