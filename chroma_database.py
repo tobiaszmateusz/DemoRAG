@@ -156,5 +156,5 @@ class ChromaDatabase:
         if name in self.selected_documents:
             self.selected_documents.remove(name)
         else:
-            self.elected_documents.append(name)
+            self.selected_documents.append(name)
 
