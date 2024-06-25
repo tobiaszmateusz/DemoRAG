@@ -55,9 +55,24 @@ class StreamlitChatView:
                 self.create_database_method = get_create_database_method()
             with st.expander("Embeddings parameters"):
                 self.embeddings_model_name = get_embed_model_work(key=None, technology=self.technology, reset_assistant=reset_assistant)
+            self.persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases",
+                                                  f"chroma_db_{self.technology}_{self.embeddings_model_name.replace(':', '_')}_{self.create_database_method}")
             self.use_memory_of_conversation = st.checkbox("Use previous chats messages", value=True, on_change=lambda: reset_mess(self.memory))
-            
-        self.persist_directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bases", f"chroma_db_{self.technology}_{self.embeddings_model_name.replace(':', '_')}_{self.create_database_method}")
+            # self.inject_knowledge = st.checkbox("Inject knowledge", value=True)
+            # knowledge_names = [fn for fn in os.listdir(knowledge_folder)
+            #                    if os.path.isdir(os.path.join(knowledge_folder, fn))]
+            # self.knowledge = st.selectbox("Select a knowledge folder:", knowledge_names)
+        st.info(
+            "Database method to rozróżnienie bazy danych na taką, która tylko dzieli dokument pdf oraz na taką która przez inny model czyta dokuemnt pdf",
+            icon="ℹ️")
+        st.subheader("Upload a document")
+        st.file_uploader(
+            "Upload document",
+            type=["pdf"],
+            key="file_uploader",
+            label_visibility="collapsed",
+            accept_multiple_files=True,
+        )
         self.user_query = st.chat_input(placeholder="Ask me anything!")
 
     def add_message(self, message: str, author: str):
