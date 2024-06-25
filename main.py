@@ -121,10 +121,11 @@ def main():
     chroma_database.get_collections()
     if len(chroma_database.collections) > 0:
         for doc in chroma_database.collections:
-            with st.container():
-                cols = st.columns([2, 1])  # Create two columns
-                with cols[0]:  # Right column
-                    st.checkbox(doc.name, key=doc.name, on_change=chroma_database.check_selected, args=(doc.name,))
+            if doc.metadata is not None and doc.metadata["embedded"] == True:
+                with st.container():
+                    cols = st.columns([2, 1])  # Create two columns
+                    with cols[0]:  # Right column
+                        st.checkbox(doc.name, key=doc.name, on_change=chroma_database.check_selected, args=(doc.name,))
 
         st.button("Create retriever from selected document", on_click=lambda: chroma_database.create_retriever_from_selected_documents())
 

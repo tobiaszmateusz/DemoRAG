@@ -73,7 +73,7 @@ class ChromaDatabase:
                 file_path = tf.name
                 with st.session_state["ingestion_spinner"], st.spinner(f"Adding {file.name}"):
                     self.collection = self.client.get_or_create_collection(file.name)
-                    if self.collection.embeddings is None:
+                    if self.collection.metadata is None:
                         self.create_embeddings(file_path, file.name)
 
 
@@ -135,7 +135,8 @@ class ChromaDatabase:
             ids=ids,
             collection_name=name,
             embedding=EMBEDDING(model=self.view.embeddings_model_name, tech=self.view.technology).embedding,
-            persist_directory=self.view.persist_directory
+            persist_directory=self.view.persist_directory,
+            collection_metadata={"embedded": True}
         )
 
     def create_retriever_from_selected_documents(self):
