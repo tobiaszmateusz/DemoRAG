@@ -41,7 +41,15 @@ from chromadb.utils import embedding_functions
 
 
 class ChromaDatabase:
-    def __init__(self, view) -> None:
+    _instance = None
+
+    def __new__(cls, view):
+        if cls._instance is None:
+            cls._instance = super(ChromaDatabase, cls).__new__(cls)
+            cls._instance.init(view)
+        return cls._instance
+
+    def init(self, view):
         self.view = view
         self.client = None
         self.collections = []

@@ -79,13 +79,13 @@ def ask():
     if (view.use_memory_of_conversation):
         chain = setup_chain(llm=model,
                             memory=memory,
-                            retriever=st.session_state["retriever"],
+                            retriever=chroma_database.retriever,
                             inject_knowledge=True,
                             system_message=view.system_message,
                             context_prompt=view.context_prompt)
     else:
         chain = setup_chain(llm=model,
-                            retriever=st.session_state["retriever"],
+                            retriever=chroma_database.retriever,
                             inject_knowledge=True,
                             system_message=view.system_message,
                             context_prompt=view.context_prompt)
@@ -107,25 +107,6 @@ def main():
     chroma_database = ChromaDatabase(view)
 
 
-    if "collections" not in st.session_state:
-        st.session_state["collections"] = None
-
-    if "selected_documents" not in st.session_state:
-        st.session_state["selected_documents"] = None
-
-    if "retrievers" not in st.session_state:
-        st.session_state["retrievers"] = None
-
-    if "retriever" not in st.session_state:
-        st.session_state["retriever"] = None
-
-    if "messages" not in st.session_state:
-        st.session_state["messages"] = []
-
-    if "user_input" not in st.session_state:
-        st.session_state["user_input"] = ""
-
-
     if view.embeddings_model_name is not None:
         if chroma_database.check_database():
             chroma_database.get_client()
@@ -143,7 +124,7 @@ def main():
             with st.container():
                 cols = st.columns([2, 1])  # Create two columns
                 with cols[0]:  # Right column
-                    st.checkbox(doc, key=doc, on_change=chroma_database.check_selected, args=(doc,))
+                    st.checkbox(doc.name, key=doc.name, on_change=chroma_database.check_selected, args=(doc.name,))
 
         st.button("Create retriever from selected document", on_click=lambda: chroma_database.create_retriever_from_selected_documents())
 
